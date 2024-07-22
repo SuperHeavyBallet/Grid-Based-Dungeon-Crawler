@@ -13,6 +13,11 @@ Focus on simplicity.
 - Different Classes have different ranges/shapes of attack and movement
 ![DungeonGridConcept](https://github.com/user-attachments/assets/e826c51d-d2b2-4267-bf05-96ffcf501c40)
 
+# Concept Visuals
+- This perspective, possibly 32bit Pixel Art Style
+![DungeonSprites](https://github.com/user-attachments/assets/a6532d46-4a0a-4074-911a-c52246f44b2e)
+
+
 # Reference Other Games
 
 Use this perspective, sprite alignment, 'top down but front facing'
