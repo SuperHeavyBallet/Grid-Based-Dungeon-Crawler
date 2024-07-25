@@ -2,14 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
     public GameObject player;
+    public GameObject playerSprite;
     public PlayerInput playerInput;
     InputAction moveAction;
 
-    public int playerMovePoints = 3;
+    public int maxPlayerMovePoints = 10;
+    public int playerMovePoints;
 
     public Vector2 playerPosition;
 
@@ -17,12 +20,23 @@ public class PlayerMovement : MonoBehaviour
 
     public NeighbourSquareCollector neighbourSquareCollector;
 
+    public TMP_Text movementPointsText;
+    public AudioClip[] footSteps;
+    AudioSource audioSource;
+
+    public TurnManager turnManager;
+
 
     // Start is called before the first frame update
     void Start()
     {
         moveAction = playerInput.actions.FindAction("Move");
         playerPosition = player.transform.position;
+       
+        audioSource = GetComponent<AudioSource>();
+        playerMovePoints = maxPlayerMovePoints;
+        UpdatePlayerMovePointText();
+
     }
 
     // Update is called once per frame
@@ -64,17 +78,23 @@ public class PlayerMovement : MonoBehaviour
         else if (context.performed)
         { Debug.Log("Action was performed");
 
+           
+
             if (playerMovePoints >0)
             {
                 Vector2 moveValue = moveAction.ReadValue<Vector2>();
 
+               
+
                 if (moveValue.x > 0)
                 {
                     moveValue.x = 1;
+                    playerSprite.transform.localScale = new Vector3(1,1,1);
                 }
                 if (moveValue.x < 0)
                 {
                     moveValue.x = -1;
+                    playerSprite.transform.localScale = new Vector3(-1, 1, 1);
                 }
                 if (moveValue.y > 0)
                 {
@@ -98,29 +118,37 @@ public class PlayerMovement : MonoBehaviour
 
                 if (moveValue.x > 0 && isFreeRight)
                 {
+                    PickRandomFootStep();
                     this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
                     playerMovePoints -= 1;
+
                 }
 
                 if (moveValue.x < 0 && isFreeLeft)
                 {
+                    PickRandomFootStep();
                     this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
                     playerMovePoints -= 1;
                 }
                 if (moveValue.y > 0 && isFreeUp)
                 {
+                    PickRandomFootStep();
                     this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
                     playerMovePoints -= 1;
                 }
                 if (moveValue.y < 0 && isFreeDown)
                 {
+                    PickRandomFootStep();
                     this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
                     playerMovePoints -= 1;
                 }
 
+
+                UpdatePlayerMovePointText();
                 
                 if (playerMovePoints == 0)
                 {
+                    turnManager.SwitchTurn("Attack");
                     Invoke("ResetMovePoints", 2);
                 }
             }
@@ -142,6 +170,21 @@ public class PlayerMovement : MonoBehaviour
 
     void ResetMovePoints()
     {
-        playerMovePoints = 3;
+        turnManager.SwitchTurn("Move");
+
+        playerMovePoints = maxPlayerMovePoints;
+        UpdatePlayerMovePointText();
+    }
+
+    void UpdatePlayerMovePointText()
+    {
+        movementPointsText.text = "Move Points: " + playerMovePoints;
+    }
+
+    void PickRandomFootStep()
+    {
+        int random = Random.Range(0, footSteps.Length);
+        audioSource.clip = footSteps[random];
+        audioSource.Play();
     }
 }
