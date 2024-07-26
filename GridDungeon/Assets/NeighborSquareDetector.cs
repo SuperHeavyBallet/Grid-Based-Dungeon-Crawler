@@ -32,7 +32,7 @@ public class NeighborSquareDetector : MonoBehaviour
             spriteRenderer.color = green;
         }
 
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy") || (collision.gameObject.CompareTag("Player")))
         {
             hasNeighbourSquare = false;
             spriteRenderer.color = red;
@@ -43,7 +43,7 @@ public class NeighborSquareDetector : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy") || (collision.gameObject.CompareTag("Player")))
         {
             hasNeighbourSquare = true;
             spriteRenderer.color = green;
