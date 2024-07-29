@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+
 
 public class ZombieMovement : MonoBehaviour
 {
@@ -8,43 +10,68 @@ public class ZombieMovement : MonoBehaviour
 
     public NeighbourSquareCollector neighbourSquareCollector;
 
-    private float moveDelay = 2f;
 
-    int maxMovementPoints = 20;
+    private float moveDelay = 1f;
+
+    int maxMovementPoints = 4;
     public int movementPoints;
+    public TMP_Text movementPointsText;
+    public GameObject zombieSprite;
+
 
     public TurnManager turnManager;
     public bool movePhase;
+    public bool moved;
 
     public bool isOnPreviousMove;
 
     public GameObject prevMoveSprite;
     GameObject prevMovement;
 
+    public bool isOnScreen;
+
+    public delegate void ZombieCompletedTurn();
+    public static event ZombieCompletedTurn OnZombieCompletedTurn;
+
+    private void OnEnable()
+    {
+        TurnManager.OnZombieMove += StartMovePhase;
+    }
+    private void OnDisable()
+    {
+        TurnManager.OnZombieMove -= StartMovePhase;
+    }
     // Start is called before the first frame update
     void Start()
     {
         movementPoints = maxMovementPoints;
        
-
-        Invoke("MakeMovement", moveDelay);
     }
+
+
 
 
         void Update()
         {
             UpdateMovementDirections();
 
-            if (turnManager.turnPhase == ("Move"))
+            if (movementPoints <= 0 && movePhase)
             {
-                movePhase = true;
+                StopMovePhase();
+                if (OnZombieCompletedTurn != null)
+                {
+                    OnZombieCompletedTurn();
+                }
             }
-            else { movePhase = false; }
+
+
 
 
         }
 
-        void UpdateMovementDirections()
+
+
+    void UpdateMovementDirections()
         {
             isFreeUp = neighbourSquareCollector.squareIsUp;
             isFreeDown = neighbourSquareCollector.squareIsDown;
@@ -56,22 +83,22 @@ public class ZombieMovement : MonoBehaviour
 
     void MakeMovement()
         {
-
-          
-                Instantiate(prevMoveSprite, prevMoveSprite.transform.position, Quaternion.identity);
-           
-            
-            
-
+        Debug.Log("Enter Movement");
         if (movePhase)
+        {
+
+            Debug.Log("Enter Move Allowed");
+            if (movementPoints > 0)
             {
-                if (movementPoints > 0)
-                {
+                Debug.Log("Enter Move Points Valid");
+                moved = false;
 
-                    int randomDirection = Random.Range(0, 4); // Range is 0 to 3 inclusive
-                    bool moved = false;
+                
 
-                    switch (randomDirection)
+                int randomDirection = Random.Range(0, 4); // Range is 0 to 3 inclusive
+               
+
+                switch (randomDirection)
                     {
                         case 0:
                             if (isFreeRight)
@@ -105,19 +132,52 @@ public class ZombieMovement : MonoBehaviour
 
                     if (!moved)
                     {
-                        // Schedule another attempt without immediate recursion
-                        Invoke("MakeMovement", moveDelay);
+                    // Schedule another attempt without immediate recursion
+                    MakeMovement();
                     }
                     else
                     {
-                        // Continue normal movement
-                        movementPoints -= 1;
-                        Invoke("MakeMovement", moveDelay);
+                    // Continue normal movement
+                    Instantiate(prevMoveSprite, zombieSprite.transform.position, Quaternion.identity);
+                    movementPoints -= 1;
+                    UpdateMovementPoints();
+
+                        if (movementPoints > 0)
+                        {
+                            Invoke("MakeMovement", moveDelay);
+                        }
+                     
+                        
                     }
-                }
             }
-            else { Invoke("MakeMovement", moveDelay); }
+
         }
+        
+    }
     
+    public void StartMovePhase()
+    {
+        Debug.Log("ZOMBIE TO MOVE!");
+        ResetMovePoints();
+        movePhase = true;
+        Invoke("MakeMovement", moveDelay);
+    }
+
+    public void StopMovePhase()
+    {
+        turnManager.SwitchTurn("Player", "Move");
+        movePhase = false;
+    }
+
+    public void ResetMovePoints()
+    {
+        movementPoints = maxMovementPoints;
+        UpdateMovementPoints();
+    }
+
+    public void UpdateMovementPoints()
+    {
+        movementPointsText.text = movementPoints.ToString();
+    }
 }
 

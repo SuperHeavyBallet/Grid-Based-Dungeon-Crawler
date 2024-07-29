@@ -25,7 +25,16 @@ public class PlayerMovement : MonoBehaviour
     AudioSource audioSource;
 
     public TurnManager turnManager;
+    public bool movePhase;
 
+    private void OnEnable()
+    {
+        TurnManager.OnPlayerMove += StartMovePhase;
+    }
+    private void OnDisable()
+    {
+        TurnManager.OnPlayerMove -= StartMovePhase;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -37,11 +46,17 @@ public class PlayerMovement : MonoBehaviour
         playerMovePoints = maxPlayerMovePoints;
         UpdatePlayerMovePointText();
 
+        turnManager.SwitchTurn("Player", "Move");
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        // Check Neighbour Squares are Free or not
+        #region Neighbour Square Check
+
         if (neighbourSquareCollector.squareIsUp)
         {
             isFreeUp = true;
@@ -65,9 +80,19 @@ public class PlayerMovement : MonoBehaviour
             isFreeRight = true;
         }
         else { isFreeRight = false; }
+        #endregion
 
 
-       
+        if (playerMovePoints <= 0 && movePhase)
+        {
+            StopMovePhase();
+        }
+                
+
+
+
+
+
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -76,91 +101,91 @@ public class PlayerMovement : MonoBehaviour
         { }
 
         else if (context.performed)
-        { Debug.Log("Action was performed");
-
-           
-
-            if (playerMovePoints >0)
+        {
+            if (movePhase)
             {
-                Vector2 moveValue = moveAction.ReadValue<Vector2>();
 
-               
+                if (playerMovePoints > 0)
+                {
+                    Vector2 moveValue = moveAction.ReadValue<Vector2>();
 
-                if (moveValue.x > 0)
-                {
-                    moveValue.x = 1;
-                    playerSprite.transform.localScale = new Vector3(1,1,1);
-                }
-                if (moveValue.x < 0)
-                {
-                    moveValue.x = -1;
-                    playerSprite.transform.localScale = new Vector3(-1, 1, 1);
-                }
-                if (moveValue.y > 0)
-                {
-                    moveValue.y = 1;
-                }
-                if (moveValue.y < 0)
-                {
-                    moveValue.y = -1;
-                }
+                    #region Normalize input Move Value
+                    if (moveValue.x > 0)
+                    {
+                        moveValue.x = 1;
+                        playerSprite.transform.localScale = new Vector3(1, 1, 1);
+                    }
+                    if (moveValue.x < 0)
+                    {
+                        moveValue.x = -1;
+                        playerSprite.transform.localScale = new Vector3(-1, 1, 1);
+                    }
+                    if (moveValue.y > 0)
+                    {
+                        moveValue.y = 1;
+                    }
+                    if (moveValue.y < 0)
+                    {
+                        moveValue.y = -1;
+                    }
+                    #endregion
 
-                if (moveValue.x > 0 && moveValue.y > 0 ||
-                        moveValue.x < 0 && moveValue.y < 0 ||
-                        moveValue.x > 0 && moveValue.y < 0 ||
-                        moveValue.x < 0 && moveValue.y > 0)
-                {
-                    Debug.Log("A CONFLICT!: " + moveValue);
-                    moveValue = Vector2.zero;
-                }
-
-                Debug.Log("Move: " + moveValue);
-
-                if (moveValue.x > 0 && isFreeRight)
-                {
-                    PickRandomFootStep();
-                    this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
-                    playerMovePoints -= 1;
-
-                }
-
-                if (moveValue.x < 0 && isFreeLeft)
-                {
-                    PickRandomFootStep();
-                    this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
-                    playerMovePoints -= 1;
-                }
-                if (moveValue.y > 0 && isFreeUp)
-                {
-                    PickRandomFootStep();
-                    this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
-                    playerMovePoints -= 1;
-                }
-                if (moveValue.y < 0 && isFreeDown)
-                {
-                    PickRandomFootStep();
-                    this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
-                    playerMovePoints -= 1;
-                }
+                    #region Account for Diagonal Moves
+                    if (moveValue.x > 0 && moveValue.y > 0 ||
+                            moveValue.x < 0 && moveValue.y < 0 ||
+                            moveValue.x > 0 && moveValue.y < 0 ||
+                            moveValue.x < 0 && moveValue.y > 0)
+                    {
+                        moveValue = Vector2.zero;
+                    }
+                    #endregion
 
 
-                UpdatePlayerMovePointText();
-                
-                if (playerMovePoints == 0)
-                {
-                    turnManager.SwitchTurn("Attack");
-                    Invoke("ResetMovePoints", 2);
+                    #region Read Input and Move Accordingly, subtract move points per move
+
+                    if (moveValue.x > 0 && isFreeRight)
+                    {
+                        PickRandomFootStep();
+                        this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
+                        playerMovePoints -= 1;
+
+                    }
+
+                    else if (moveValue.x < 0 && isFreeLeft)
+                    {
+                        PickRandomFootStep();
+                        this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
+                        playerMovePoints -= 1;
+                    }
+                    else if (moveValue.y > 0 && isFreeUp)
+                    {
+                        PickRandomFootStep();
+                        this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
+                        playerMovePoints -= 1;
+                    }
+                    else if (moveValue.y < 0 && isFreeDown)
+                    {
+                        PickRandomFootStep();
+                        this.transform.position = new Vector2(this.transform.position.x + moveValue.x, this.transform.position.y + moveValue.y);
+                        playerMovePoints -= 1;
+                    }
+                    #endregion
+
+
+
+
+
                 }
+
             }
-            
-                
-            
 
-            
+            UpdatePlayerMovePointText();
 
         }
-        else if (context.canceled)
-        {  }
+        else if (context.canceled) // If at the end of move, player is out of points, trigger end of Move Phase, go to Enemy Phase
+        {
+
+        }
 
        
 
@@ -168,9 +193,20 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    public void StartMovePhase()
+    {
+        ResetMovePoints();
+        movePhase = true;
+    }
+
+    public void StopMovePhase()
+    {
+        turnManager.SwitchTurn("Enemy", "Move");
+        movePhase = false;
+    }
+
     void ResetMovePoints()
     {
-        turnManager.SwitchTurn("Move");
 
         playerMovePoints = maxPlayerMovePoints;
         UpdatePlayerMovePointText();
