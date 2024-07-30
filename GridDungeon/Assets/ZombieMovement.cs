@@ -30,22 +30,24 @@ public class ZombieMovement : MonoBehaviour
 
     public bool isOnScreen;
 
-    public delegate void ZombieCompletedTurn();
-    public static event ZombieCompletedTurn OnZombieCompletedTurn;
+    public delegate void EnemyCompletedTurn();
+    public static event EnemyCompletedTurn OnEnemyCompletedTurn;
 
     private void OnEnable()
     {
-        TurnManager.OnZombieMove += StartMovePhase;
+        TurnManager.OnEnemyMove += StartMovePhase;
     }
     private void OnDisable()
     {
-        TurnManager.OnZombieMove -= StartMovePhase;
+        TurnManager.OnEnemyMove -= StartMovePhase;
     }
     // Start is called before the first frame update
     void Start()
     {
-        movementPoints = maxMovementPoints;
-       
+        
+        StartMovePhase();
+
+
     }
 
 
@@ -58,9 +60,9 @@ public class ZombieMovement : MonoBehaviour
             if (movementPoints <= 0 && movePhase)
             {
                 StopMovePhase();
-                if (OnZombieCompletedTurn != null)
+                if (OnEnemyCompletedTurn != null)
                 {
-                    OnZombieCompletedTurn();
+                    OnEnemyCompletedTurn();
                 }
             }
 
@@ -83,14 +85,12 @@ public class ZombieMovement : MonoBehaviour
 
     void MakeMovement()
         {
-        Debug.Log("Enter Movement");
         if (movePhase)
         {
 
-            Debug.Log("Enter Move Allowed");
             if (movementPoints > 0)
             {
-                Debug.Log("Enter Move Points Valid");
+    
                 moved = false;
 
                 
@@ -157,7 +157,7 @@ public class ZombieMovement : MonoBehaviour
     
     public void StartMovePhase()
     {
-        Debug.Log("ZOMBIE TO MOVE!");
+       // Debug.Log("ZOMBIE TO MOVE!");
         ResetMovePoints();
         movePhase = true;
         Invoke("MakeMovement", moveDelay);

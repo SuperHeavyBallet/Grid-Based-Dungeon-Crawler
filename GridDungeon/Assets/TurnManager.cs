@@ -18,36 +18,46 @@ public class TurnManager : MonoBehaviour
     public delegate void PlayerMove();
     public static event PlayerMove OnPlayerMove;
 
-    public delegate void ZombieMove();
-    public static event ZombieMove OnZombieMove;
+    public delegate void EnemyMove();
+    public static event EnemyMove OnEnemyMove;
 
-    public delegate void ZombieAttack();
-    public static event ZombieAttack OnZombieAttack;
+    public delegate void EnemyAttack();
+    public static event EnemyAttack OnEnemyAttack;
 
-    public int completedZombies = 0;
+    public int completedEnemies = 0;
     public int enemiesInGame = 0;
-    
 
+    public string prevTurn, prevPhase;
+    
+    // Turn/Phase Order
+    // Zombie Move
+    // Player Move
+    // Player Attack
+    // Zombie Attack
+    // Repeat
     private void OnEnable()
     {
-        ZombieMovement.OnZombieCompletedTurn += AddCompletedZombie;
+        ZombieMovement.OnEnemyCompletedTurn += AddCompletedEnemy;
     }
     private void OnDisable()
     {
-        ZombieMovement.OnZombieCompletedTurn -= AddCompletedZombie;
+        ZombieMovement.OnEnemyCompletedTurn -= AddCompletedEnemy;
     }
     // Start is called before the first frame update
     void Start()
     {
-        currentTurn = "Player";
-        currentTurnText.text = "Turn: " + currentTurn;
 
-        turnPhase = "Move";
-        turnPhaseText.text = "Phase: " + turnPhase;
+        Invoke("FirstTurn", 4f);
+        
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemies");
         enemiesInGame = enemies.Length;
 
+    }
+
+    void FirstTurn()
+    {
+        SwitchTurn("Enemy", "Move");
     }
 
     // Update is called once per frame
@@ -58,7 +68,29 @@ public class TurnManager : MonoBehaviour
 
     public void SwitchTurn(string newTurn, string newPhase)
     {
-        Debug.Log("Enter Switch Turn" + (newTurn + newPhase));
+        if (newTurn == "Enemy" && newPhase == "Move")
+        {
+            prevTurn = "Enemy";
+            prevPhase = "Attack";
+        }
+        else if (newTurn == "Player" && newPhase == "Move" )
+        {
+            prevTurn = "Enemy";
+            prevPhase = "Move";
+        }
+        else if (newTurn == "Player" && newPhase == "Attack")
+        {
+            prevTurn = "Player";
+            prevPhase = "Move";
+        }
+        else if (newTurn == "Enemy" && newPhase == "Attack")
+        {
+            prevTurn = "Player";
+            prevPhase = "Attack";
+        }
+
+        Debug.Log("New: " + newTurn + " " + newPhase + ", Prev: " + prevTurn + " " + prevPhase);
+
         turnPhase = newTurn;
         turnPhase = newPhase;
 
@@ -75,22 +107,22 @@ public class TurnManager : MonoBehaviour
         }
         else if (newTurn == "Enemy" && newPhase == "Move")
         {
-            if (OnZombieMove != null)
+            if (OnEnemyMove != null)
             {
-                completedZombies = 0;
-                OnZombieMove();
+                completedEnemies = 0;
+                OnEnemyMove();
             }
             
         }
     }
 
-    public void AddCompletedZombie()
+    public void AddCompletedEnemy()
     {
-        completedZombies += 1;
+        completedEnemies += 1;
 
-        if (completedZombies == enemiesInGame)
+        if (completedEnemies == enemiesInGame)
         {
-            Debug.Log("All Enemies Completed");
+           // Debug.Log("All Enemies Completed");
 
             //Go To Player Turn
         }

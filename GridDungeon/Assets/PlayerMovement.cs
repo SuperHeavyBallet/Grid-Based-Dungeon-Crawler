@@ -43,10 +43,8 @@ public class PlayerMovement : MonoBehaviour
         playerPosition = player.transform.position;
        
         audioSource = GetComponent<AudioSource>();
-        playerMovePoints = maxPlayerMovePoints;
-        UpdatePlayerMovePointText();
 
-        turnManager.SwitchTurn("Player", "Move");
+        UpdatePlayerMovePointText();
 
     }
 
@@ -202,6 +200,7 @@ public class PlayerMovement : MonoBehaviour
     public void StopMovePhase()
     {
         turnManager.SwitchTurn("Enemy", "Move");
+        //turnManager.SwitchTurn("Player", "Attack");
         movePhase = false;
     }
 
