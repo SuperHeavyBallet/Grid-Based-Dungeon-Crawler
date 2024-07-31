@@ -45,7 +45,7 @@ public class ZombieMovement : MonoBehaviour
     void Start()
     {
         
-        StartMovePhase();
+     
 
 
     }

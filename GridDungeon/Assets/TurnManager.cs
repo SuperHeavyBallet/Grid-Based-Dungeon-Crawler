@@ -18,6 +18,9 @@ public class TurnManager : MonoBehaviour
     public delegate void PlayerMove();
     public static event PlayerMove OnPlayerMove;
 
+    public delegate void PlayerAttack();
+    public static event PlayerAttack OnPlayerAttack;
+
     public delegate void EnemyMove();
     public static event EnemyMove OnEnemyMove;
 
@@ -46,8 +49,10 @@ public class TurnManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        turnPhaseText.text = "Phase: " + "Enemy";
+        currentTurnText.text = "Turn: " + "Move";
+        Invoke("FirstTurn", 2f);
 
-        Invoke("FirstTurn", 4f);
         
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemies");
@@ -89,7 +94,7 @@ public class TurnManager : MonoBehaviour
             prevPhase = "Attack";
         }
 
-        Debug.Log("New: " + newTurn + " " + newPhase + ", Prev: " + prevTurn + " " + prevPhase);
+        //Debug.Log("New: " + newTurn + " " + newPhase + ", Prev: " + prevTurn + " " + prevPhase);
 
         turnPhase = newTurn;
         turnPhase = newPhase;
@@ -113,6 +118,13 @@ public class TurnManager : MonoBehaviour
                 OnEnemyMove();
             }
             
+        }
+        else if (newTurn == "Player" && newPhase == "Attack")
+        {
+            if(OnPlayerAttack != null)
+            {
+                OnPlayerAttack();
+            }
         }
     }
 

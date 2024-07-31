@@ -63,6 +63,7 @@
     <Compile Include="Assets\NeighbourSquareCollector.cs" />
     <Compile Include="Assets\TurnManager.cs" />
     <Compile Include="Assets\PlayerMovement.cs" />
+    <Compile Include="Assets\AttackCursorOnEnemy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
