@@ -53,12 +53,19 @@ public class TurnManager : MonoBehaviour
         currentTurnText.text = "Turn: " + "Move";
         Invoke("FirstTurn", 2f);
 
+
+
+
+
+
+     
+
+        
         
 
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemies");
-        enemiesInGame = enemies.Length;
-
     }
+
+    
 
     void FirstTurn()
     {
@@ -73,6 +80,7 @@ public class TurnManager : MonoBehaviour
 
     public void SwitchTurn(string newTurn, string newPhase)
     {
+        
         if (newTurn == "Enemy" && newPhase == "Move")
         {
             prevTurn = "Enemy";

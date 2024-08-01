@@ -14,13 +14,16 @@ public class PlayerMovement : MonoBehaviour
     public int maxPlayerMovePoints = 10;
     public int playerMovePoints;
 
+    public int maxPlayerAttackPoints = 2;
+    public int playerAttackPoints;
+
     public Vector2 playerPosition;
 
     public bool isFreeUp, isFreeDown, isFreeRight, isFreeLeft;
 
     public NeighbourSquareCollector neighbourSquareCollector;
 
-    public TMP_Text movementPointsText;
+    public TMP_Text movementPointsText, attackPointsText;
     public AudioClip[] footSteps;
     AudioSource audioSource;
 
@@ -33,6 +36,12 @@ public class PlayerMovement : MonoBehaviour
     public GameObject attackHitbox;
 
     public int attackRange = 1;
+
+    public List<Transform> enemyPositions;
+
+    public GameObject tempHitSprite;
+
+    
 
     private void OnEnable()
     {
@@ -48,14 +57,18 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+       
+
         moveAction = playerInput.actions.FindAction("Move");
         playerPosition = player.transform.position;
        
         audioSource = GetComponent<AudioSource>();
 
         UpdatePlayerMovePointText();
+        UpdatePlayerAttackPointText();
 
     }
+
 
     // Update is called once per frame
     void Update()
@@ -94,6 +107,11 @@ public class PlayerMovement : MonoBehaviour
         {
             StopMovePhase();
         }
+        
+        if (playerAttackPoints <= 0 && attackPhase)
+        {
+            StopAttackPhase();
+        }
                 
 
         if (attackPhase)
@@ -110,6 +128,22 @@ public class PlayerMovement : MonoBehaviour
 
 
     }
+
+    public void UpdateEnemyPositions()
+    {
+        enemyPositions = new List<Transform>();
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemies");
+
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            enemyPositions.Add(enemies[i].transform);
+            Debug.Log("Position Enemy " + i + ": " + enemyPositions[i].position);
+        }
+
+    }
+
 
     public void Move(InputAction.CallbackContext context)
     {
@@ -204,68 +238,80 @@ public class PlayerMovement : MonoBehaviour
             }
             else if (attackPhase)
             {
-                Debug.Log("Enter Attack Phase");
+                if (playerAttackPoints > 0)
+                { 
+                    Debug.Log("Enter Attack Phase");
 
-                Vector2 attackValue = moveAction.ReadValue<Vector2>();
+                    Vector2 attackValue = moveAction.ReadValue<Vector2>();
 
-                Debug.Log("Attack Direction: " + attackValue);
 
-                #region Normalize input Attack Value
+                    #region Normalize input Attack Value
 
-                attackValue = NormalizInput(attackValue);
+                    attackValue = NormalizInput(attackValue);
 
-                #region Previous, Working Individual Normalize Values, Pre Function Switching
-                /*
-                if (attackValue.x > 0)
-                {
-                    attackValue.x = 1;
-                }
-                if(attackValue.x < 0)
-                {
-                    attackValue.x = -1;
-                }
-                if(attackValue.y > 0)
-                {
-                    attackValue.y = 1;
-                }
-                if(attackValue.y < 0)
-                {
-                    attackValue.y = -1;
-                }*/
-                #endregion
-                #endregion
+                    #region Previous, Working Individual Normalize Values, Pre Function Switching
+                    /*
+                    if (attackValue.x > 0)
+                    {
+                        attackValue.x = 1;
+                    }
+                    if(attackValue.x < 0)
+                    {
+                        attackValue.x = -1;
+                    }
+                    if(attackValue.y > 0)
+                    {
+                        attackValue.y = 1;
+                    }
+                    if(attackValue.y < 0)
+                    {
+                        attackValue.y = -1;
+                    }*/
+                    #endregion
+                    #endregion
 
-                #region Account for Diagonal Attack
-                attackValue = DiagonalBlock(attackValue);
-                #endregion
+                    #region Account for Diagonal Attack
+                    attackValue = DiagonalBlock(attackValue);
+                    #endregion
 
-                // Place Attack Cursor
-                if (attackValue.x > 0)
-                {
-                    attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x + 1, centralAttackCursorPosition.position.y);
+                    // Place Attack Cursor
+                    if (attackValue.x > 0)
+                    {
+                        attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x + 1, centralAttackCursorPosition.position.y);
+
+                        CheckEnemyInRange(new Vector2(attackCursor.transform.position.x - 0.5f, attackCursor.transform.position.y - 0.5f));
                     
-                }
-                else if ( attackValue.x < 0)
-                {
-                    attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x - 1, centralAttackCursorPosition.position.y);
-                }
-                else if (attackValue.y > 0)
-                {
-                    attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x, centralAttackCursorPosition.position.y + 1);
-                }
-                else if (attackValue.y < 0)
-                {
-                    attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x, centralAttackCursorPosition.position.y - 1);
+                    }
+                    else if ( attackValue.x < 0)
+                    {
+                        attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x - 1, centralAttackCursorPosition.position.y);
+                        CheckEnemyInRange(new Vector2(attackCursor.transform.position.x - 0.5f, attackCursor.transform.position.y - 0.5f));
+                    }
+                    else if (attackValue.y > 0)
+                    {
+                        attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x, centralAttackCursorPosition.position.y + 1);
+                        CheckEnemyInRange(new Vector2(attackCursor.transform.position.x - 0.5f, attackCursor.transform.position.y - 0.5f));
+                    }
+                    else if (attackValue.y < 0)
+                    {
+                        attackCursor.transform.position = new Vector2(centralAttackCursorPosition.position.x, centralAttackCursorPosition.position.y - 1);
+                        CheckEnemyInRange(new Vector2(attackCursor.transform.position.x - 0.5f, attackCursor.transform.position.y - 0.5f));
+                    }
+                    else
+                    {
+                        attackCursor.transform.position = centralAttackCursorPosition.transform.position;
+                    }
+
+                    attackHitbox.transform.position = attackCursor.transform.position;
                 }
                 else
                 {
-                    attackCursor.transform.position = centralAttackCursorPosition.transform.position;
-                }
 
-                attackHitbox.transform.position = attackCursor.transform.position;
+                }
             }
 
             UpdatePlayerMovePointText();
+            UpdatePlayerAttackPointText();
 
         }
         else if (context.canceled) // If at the end of move, player is out of points, trigger end of Move Phase, go to Enemy Phase
@@ -277,6 +323,26 @@ public class PlayerMovement : MonoBehaviour
 
        
 
+    }
+
+    public void CheckEnemyInRange(Vector2 attackSquare)
+    {
+        for (int i = 0; i < enemyPositions.Count; i++)
+        {
+            Debug.Log("Square: " + attackSquare);
+
+            if (new Vector2(enemyPositions[i].position.x, enemyPositions[i].position.y) == attackSquare)
+            {
+                Debug.Log("ENEMY HITTTT!!!!");
+                Instantiate(tempHitSprite, enemyPositions[i]);
+                playerAttackPoints -= 1;
+                break;
+            }
+            else 
+            {
+                Debug.Log("MISSSS" + enemyPositions[i].position);
+            }
+        }
     }
 
     public Vector2 NormalizInput(Vector2 input)
@@ -321,7 +387,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void StartMovePhase()
     {
+        UpdateEnemyPositions();
         ResetMovePoints();
+        ResetAttackPoints();
         movePhase = true;
     }
 
@@ -339,9 +407,19 @@ public class PlayerMovement : MonoBehaviour
         UpdatePlayerMovePointText();
     }
 
+    void ResetAttackPoints()
+    {
+        playerAttackPoints = maxPlayerAttackPoints;
+        UpdatePlayerAttackPointText();
+    }
+
     void UpdatePlayerMovePointText()
     {
         movementPointsText.text = "Move Points: " + playerMovePoints;
+    }
+    void UpdatePlayerAttackPointText()
+    {
+        attackPointsText.text = "Attack Points: " + playerAttackPoints;
     }
 
     void PickRandomFootStep()

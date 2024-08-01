@@ -10,6 +10,7 @@ TagManager:
   - ViewArea
   - Enemies
   - PlayerAttack
+  - Test
   layers:
   - Default
   - TransparentFX

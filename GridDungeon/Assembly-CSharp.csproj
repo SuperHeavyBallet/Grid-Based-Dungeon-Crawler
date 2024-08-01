@@ -57,13 +57,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scenes\Input\GridDungeonInput.cs" />
+    <Compile Include="Assets\AttackCursorOnEnemy.cs" />
     <Compile Include="Assets\NeighborSquareDetector.cs" />
     <Compile Include="Assets\ZombieMovement.cs" />
     <Compile Include="Assets\GridGenerator.cs" />
     <Compile Include="Assets\NeighbourSquareCollector.cs" />
     <Compile Include="Assets\TurnManager.cs" />
     <Compile Include="Assets\PlayerMovement.cs" />
-    <Compile Include="Assets\AttackCursorOnEnemy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
