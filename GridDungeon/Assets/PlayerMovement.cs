@@ -333,8 +333,9 @@ public class PlayerMovement : MonoBehaviour
 
             if (new Vector2(enemyPositions[i].position.x, enemyPositions[i].position.y) == attackSquare)
             {
-                Debug.Log("ENEMY HITTTT!!!!");
-                Instantiate(tempHitSprite, enemyPositions[i]);
+                Vector2 offSet = new Vector2(0.5f, 0.5f);
+                Vector2 enemyPosition = new Vector2(enemyPositions[i].position.x + offSet.x, enemyPositions[i].position.y + offSet.y);
+                Instantiate(tempHitSprite, enemyPosition, Quaternion.identity);
                 playerAttackPoints -= 1;
                 break;
             }
