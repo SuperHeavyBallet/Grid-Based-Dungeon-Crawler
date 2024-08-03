@@ -59,14 +59,14 @@
     <Compile Include="Assets\Scenes\Input\GridDungeonInput.cs" />
     <Compile Include="Assets\AttackCursorOnEnemy.cs" />
     <Compile Include="Assets\NeighborSquareDetector.cs" />
+    <Compile Include="Assets\AttackDetection.cs" />
     <Compile Include="Assets\ZombieMovement.cs" />
+    <Compile Include="Assets\AttackCheck.cs" />
     <Compile Include="Assets\ZombieHealth.cs" />
     <Compile Include="Assets\GridGenerator.cs" />
     <Compile Include="Assets\NeighbourSquareCollector.cs" />
     <Compile Include="Assets\TurnManager.cs" />
     <Compile Include="Assets\PlayerMovement.cs" />
-    <Compile Include="Assets\AttackDetection.cs" />
-    <Compile Include="Assets\AttackCheck.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

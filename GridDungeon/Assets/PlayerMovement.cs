@@ -445,6 +445,6 @@ public class PlayerMovement : MonoBehaviour
     {
         Debug.Log("Stop Attack Phase, Player");
         attackPhase = false;
-        turnManager.SwitchTurn("Enemy", "Attack");
+        turnManager.SwitchTurn("Enemy", "Move");
     }
 }
